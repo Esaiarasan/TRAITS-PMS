@@ -1,13 +1,15 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // Or replace * with 'http://localhost:3000' for stricter security
+// ✅ CORS Headers (must be at top)
+header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+// ✅ Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
+
 require '../config/db.php';
 // ### REMOVED JWT IMPORT ###
 // require '../lib/jwt.php'; // No longer needed
@@ -52,6 +54,15 @@ switch ($method) {
         break;
 
     case 'POST':
+
+        $data = json_decode(file_get_contents('php://input'), true);
+if ($data === null) {
+    http_response_code(400);
+    echo json_encode(['message' => 'Invalid JSON payload']);
+    exit();
+}
+
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (isset($_FILES['csv_file'])) {
             $csv = array_map('str_getcsv', file($_FILES['csv_file']['tmp_name']));
